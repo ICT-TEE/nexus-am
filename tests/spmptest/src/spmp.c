@@ -2,9 +2,11 @@
 
 #define __ARCH_RISCV64_XS 1
 
-#define EXCEPTION_INSTR_PAGE_FAULT 12
-#define EXCEPTION_LOAD_PAGE_FAULT 13
-#define EXCEPTION_STORE_PAGE_FAULT 15
+#define EXCEPTION_U_ECALL 8
+#define EXCEPTION_S_ECALL 9
+#define EXCEPTION_INSTR_SPMP_FAULT 16
+#define EXCEPTION_LOAD_SPMP_FAULT 17
+#define EXCEPTION_STORE_SPMP_FAULT 18
 
 inline int inst_is_compressed(uint64_t addr){
   uint8_t byte = *(uint8_t*)addr;
@@ -51,10 +53,21 @@ _Context* spmp_instr_fault_handler(_Event* ev, _Context *c) {
   return c;
 }
 
+void test_entry();
+
+_Context* s2m(_Event* ev, _Context *c) {
+  printf("to M mode\n");
+  test_entry();
+  c->sepc = 0;
+  return c;
+}
+
 void init_spmp_handler() {
-  irq_handler_reg(EXCEPTION_STORE_PAGE_FAULT, &spmp_store_fault_handler);
-  irq_handler_reg(EXCEPTION_LOAD_PAGE_FAULT, &spmp_load_fault_handler);
-  irq_handler_reg(EXCEPTION_INSTR_PAGE_FAULT, &spmp_instr_fault_handler);
+  irq_handler_reg(EXCEPTION_STORE_SPMP_FAULT, &spmp_store_fault_handler);
+  irq_handler_reg(EXCEPTION_LOAD_SPMP_FAULT, &spmp_load_fault_handler);
+  irq_handler_reg(EXCEPTION_INSTR_SPMP_FAULT, &spmp_instr_fault_handler);
+  irq_handler_reg(EXCEPTION_U_ECALL, &s2m);
+  irq_handler_reg(EXCEPTION_S_ECALL, &s2m);
 }
 
 // for test

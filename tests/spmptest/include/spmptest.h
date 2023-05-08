@@ -15,7 +15,7 @@
 void init_spmp();
 void enable_spmp(uintptr_t pmp_reg, uintptr_t pmp_addr, uintptr_t pmp_size, uint8_t s, uint8_t permission);
 void enable_spmp_TOR(uintptr_t pmp_reg, uintptr_t pmp_addr, uintptr_t pmp_size, bool s, uint8_t permission);
-void disable_spmp(uintptr_t pmp_reg);
+void clean_spmp_all();
 
 void init_spmp_handler();
 

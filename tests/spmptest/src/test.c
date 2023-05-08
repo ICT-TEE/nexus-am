@@ -28,6 +28,10 @@ void init_instr_mem(uint64_t addr) {
 }
 
 void spmp_test_init_modeU() {
+  for (int i = 0; i < SPMP_COUNT; i++) {
+    test_priv[i] = 0;
+  }
+  clean_spmp_all();
   enable_spmp(7, TEST_BASE+0x7000, 0x1000, 1, 7);
   enable_spmp(SPMP_COUNT-1, 0x0, 0x100000000, 0, 7);
 
@@ -46,6 +50,10 @@ void spmp_test_init_modeU() {
 }
 
 void spmp_test_init_modeS() {
+  for (int i = 0; i < SPMP_COUNT; i++) {
+    test_priv[i] = 0;
+  }
+  clean_spmp_all();
   for (int i = 0; i < SPMP_COUNT; i++) {
     uint8_t r = (i >> 2) & 1;
     uint8_t w = (i >> 1) & 1;
@@ -74,12 +82,12 @@ void spmp_test_main(uint8_t* compare) {
 
   if (wrong) {_halt(1);}
   printf("sPMP test pass\n");
-  _halt(0);
+  // _halt(0);
 }
 
-void spmp_test_modeU() { spmp_test_main(modeU_priv); }
-void spmp_test_modeS() { spmp_test_main(modeS_priv); }
-void spmp_test_modeS_SUM() { spmp_test_main(modeS_SUM_priv); }
+void spmp_test_modeU() { spmp_test_main(modeU_priv); asm volatile("ecall;"); }
+void spmp_test_modeS() { spmp_test_main(modeS_priv); asm volatile("ecall;"); }
+void spmp_test_modeS_SUM() { spmp_test_main(modeS_SUM_priv); _halt(0); }
 
 /*
 void spmp_test() {
