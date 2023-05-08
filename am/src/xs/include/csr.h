@@ -21,6 +21,15 @@
 #define CSR_PMPCFG0 0x3a0
 #define CSR_PMPADDR0 0x3b0
 
+// for spmp
+#define SPMPCFG_BASE 0x1a0
+#define SPMPADDR_BASE 0x1b0
+
+#define SPMP_COUNT 16
+
+#define CSR_SPMPCFG0 0x1a0
+#define CSR_SPMPADDR0 0x1b0
+
 // hpm csr
 #define CSR_MCYCLE 0xb00
 #define CSR_MINSTRET 0xb02

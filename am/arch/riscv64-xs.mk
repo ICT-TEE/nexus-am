@@ -18,6 +18,7 @@ AM_SRCS := noop/isa/riscv/trm.c \
            xs/isa/riscv/mpe.c \
            xs/isa/riscv/clint.c \
            xs/isa/riscv/pmp.c \
+           xs/isa/riscv/spmp.c \
            xs/isa/riscv/plic.c \
            xs/isa/riscv/pma.c \
            xs/isa/riscv/cache.c \

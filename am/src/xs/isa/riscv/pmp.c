@@ -52,6 +52,8 @@ unsigned long csr_read_num(int csr_num)
 	switch (csr_num) {
 	switchcase_csr_read_16(CSR_PMPCFG0, ret)
 	switchcase_csr_read_64(CSR_PMPADDR0, ret)
+	switchcase_csr_read_16(CSR_SPMPCFG0, ret)
+	switchcase_csr_read_64(CSR_SPMPADDR0, ret)
 	};
 
 	return ret;
@@ -97,6 +99,8 @@ void csr_write_num(int csr_num, unsigned long val)
 	switch (csr_num) {
 	switchcase_csr_write_16(CSR_PMPCFG0, val)
 	switchcase_csr_write_64(CSR_PMPADDR0, val)
+	switchcase_csr_write_16(CSR_SPMPCFG0, val)
+	switchcase_csr_write_64(CSR_SPMPADDR0, val)
 	};
 
 #undef switchcase_csr_write_64
@@ -140,6 +144,8 @@ void csr_set_num(int csr_num, unsigned long val)
 	switch (csr_num) {
 	switchcase_csr_set_16(CSR_PMPCFG0, val)
 	switchcase_csr_set_64(CSR_PMPADDR0, val)
+	switchcase_csr_set_16(CSR_SPMPCFG0, val)
+	switchcase_csr_set_64(CSR_SPMPADDR0, val)
 	};
 
 #undef switchcase_csr_set_64
@@ -183,6 +189,8 @@ void csr_clear_num(int csr_num, unsigned long val)
 	switch (csr_num) {
 	switchcase_csr_clear_16(CSR_PMPCFG0, val)
 	switchcase_csr_clear_64(CSR_PMPADDR0, val)
+	switchcase_csr_clear_16(CSR_SPMPCFG0, val)
+	switchcase_csr_clear_64(CSR_SPMPADDR0, val)
 	};
 
 #undef switchcase_csr_clear_64
