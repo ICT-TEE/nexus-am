@@ -48,6 +48,7 @@ typedef struct _Event {
 
 // Arch-dependent processor context
 typedef struct _Context _Context;
+typedef struct _Context_m _Context_m;
 
 // A protected address space with user memory @area
 // and arch-dependent @ptr
