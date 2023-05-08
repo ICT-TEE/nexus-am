@@ -128,6 +128,31 @@ _Context* __am_irq_handle(_Context *c) {
   return c;
 }
 
+_Context* __am_irq_handle_m(_Context_m *c) {
+  _Event ev = {0};
+  uintptr_t mcause_code = c->mcause & SCAUSE_MASK;
+  // printf("am irq triggered %lld, mepc=%llx\n", c->mcause, c->mepc);
+  if (c->mcause & INTR_BIT) {
+    assert(mcause_code < INTERRUPT_CAUSE_SIZE);
+    // printf("is an interrupt\n");
+    interrupt_handler[mcause_code](&ev, (_Context*)c);
+  } else {
+    assert(mcause_code < EXCEPTION_CAUSE_SIZE);
+    // printf("is an exception\n");
+    if (mcause_code == 2) {
+      printf("illegal instruction\n");
+      _halt(1);
+    }
+    exception_handler[mcause_code](&ev, (_Context*)c);
+  }
+
+#if __riscv_xlen == 64
+  asm volatile("fence.i");
+#endif
+
+  return (_Context*)c;
+}
+
 extern void __am_asm_trap(void);
 
 /*

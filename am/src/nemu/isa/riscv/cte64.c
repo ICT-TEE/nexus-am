@@ -1,11 +1,11 @@
 #include <riscv.h>
 #include <nemu.h>
 #include <printf.h>
-extern void __am_timervec(void);
+extern void __am_asm_trap_m(void);
 
 static void init_machine_exception() {
   // set M-mode exception entry
-  asm volatile("csrw mtvec, %0" : : "r"(__am_timervec));
+  asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap_m));
 }
 
 int g_config_disable_timer = 0; // dirty hack of __am_init_cte64(), to be refactored
@@ -25,7 +25,7 @@ static void init_eip() {
 void __am_init_cte64() {
   // set delegation (do not deleg illegal instruction exception)
   asm volatile("csrw mideleg, %0" : : "r"(0xffff));
-  asm volatile("csrw medeleg, %0" : : "r"(0xfffb));
+  asm volatile("csrw medeleg, %0" : : "r"(0xf8fb));
 
   // set PMP to access all memory in S-mode
   // asm volatile("csrw pmpaddr8, %0" : : "r"(-1));

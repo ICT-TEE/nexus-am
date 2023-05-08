@@ -74,3 +74,33 @@ save_context:
 
 return:
   sret
+
+.align 4
+.globl __am_asm_trap_m
+__am_asm_trap_m:
+  # jal __am_timervec
+
+  addi sp, sp, -CONTEXT_SIZE
+
+  MAP(REGS, PUSH)
+
+  csrr t0, mcause
+  csrr t1, mstatus
+  csrr t2, mepc
+
+  STORE t0, OFFSET_CAUSE(sp)
+  STORE t1, OFFSET_STATUS(sp)
+  STORE t2, OFFSET_EPC(sp)
+
+  mv a0, sp
+  jal __am_irq_handle_m
+
+  LOAD t1, OFFSET_STATUS(sp)
+  LOAD t2, OFFSET_EPC(sp)
+  csrw mstatus, t1
+  csrw mepc, t2
+
+  MAP(REGS, POP)
+
+  addi sp, sp, CONTEXT_SIZE
+  mret

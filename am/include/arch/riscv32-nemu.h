@@ -11,6 +11,10 @@ struct _Context {
   uintptr_t sepc;
 };
 
+struct _Context_m {
+  uintptr_t gpr[32], mcause, mstatus, mepc;
+};
+
 #define GPR1 gpr[17] // a7
 #define GPR2 gpr[10] // a0
 #define GPR3 gpr[11] // a1
