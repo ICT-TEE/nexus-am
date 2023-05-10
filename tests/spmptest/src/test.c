@@ -73,8 +73,7 @@ void spmp_test_main(uint8_t* compare) {
   }
   bool wrong = 0;
   for (int i = 0; i < SPMP_COUNT; i++) {
-      // printf("[SRWX] %d:\tshould be %d, but %d\n", i, modeU_priv[i], (~test_priv[i])&7);
-    if (!(compare[i] ^ test_priv[i])) {
+    if (compare[i] != ((~test_priv[i])&7)) {
       printf("[SRWX] %d:\tshould be %d, but %d\n", i, compare[i], (~test_priv[i])&7);
       wrong = 1;
     }
