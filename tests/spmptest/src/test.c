@@ -17,8 +17,22 @@ static uint8_t modeS_SUM_priv[SPMP_COUNT] = { // 0xwr,
   0, 0, 3, 3, 1, 1, 3, 3,
   0, 4, 4, 5, 1, 5, 3, 1
 };
+static uint8_t modeU_priv_PMP[SPMP_COUNT] = { // 0xwr,
+  7, 6, 5, 1, 5, 4, 1, 5, // switch 7,15
+  7, 7, 6, 6, 7, 7, 7, 0
+};
 
+static uint8_t modeS_priv_PMP[SPMP_COUNT] = { // 0xwr,
+  7, 7, 1, 1, 7, 7, 7, 7,
+  7, 6, 6, 4, 5, 4, 1, 0
+};
+
+static uint8_t modeS_SUM_priv_PMP[SPMP_COUNT] = { // 0xwr,
+  7, 7, 1, 1, 5, 5, 1, 1,
+  7, 6, 6, 4, 5, 4, 1, 0
+};
 extern uint8_t test_priv[SPMP_COUNT];
+extern uint8_t test_priv_PMP[PMP_COUNT];
 
 void init_instr_mem(uint64_t addr) {
   uint32_t nop[3] = {0x00010001, 0x00010001, 0x00080067};
@@ -26,7 +40,54 @@ void init_instr_mem(uint64_t addr) {
   ((uint32_t*)addr)[1] = nop[1];
   ((uint32_t*)addr)[2] = nop[2];
 }
-
+void pmp_test_init_modeU(){
+  for (int i = 0; i < PMP_COUNT; i++) {
+    test_priv_PMP[i] = 0;
+  }
+  clean_pmp_all();
+  clean_spmp_all();
+  enable_spmp(SPMP_COUNT-1, 0x0, 0x100000000, 0, 7);
+  for (int i = 0; i < PMP_COUNT; i++) {
+    
+    addrs[i] = TEST_BASE + (i*0x1000);
+    init_instr_mem(addrs[i]);
+    if(i!=PMP_COUNT-1){
+    enable_pmp(i, addrs[i], 0x1000, 0, modeU_priv[i]);
+    }
+  }
+}
+void pmp_test_init_modeS_sum0(){
+  for (int i = 0; i < PMP_COUNT; i++) {
+    test_priv_PMP[i] = 0;
+  }
+  clean_pmp_all();
+  clean_spmp_all();
+  //enable_spmp(SPMP_COUNT-1, 0x0, 0x100000000, 0, 7);
+  for (int i = 0; i < PMP_COUNT; i++) {
+    
+    addrs[i] = TEST_BASE + (i*0x1000);
+    init_instr_mem(addrs[i]);
+    if(i!=PMP_COUNT-1){
+    enable_pmp(i, addrs[i], 0x1000, 0, modeS_priv[i]);
+    } 
+  }
+}
+void pmp_test_init_modeS_sum1(){
+  for (int i = 0; i < PMP_COUNT; i++) {
+    test_priv_PMP[i] = 0;
+  }
+  clean_pmp_all();
+  clean_spmp_all();
+  //enable_spmp(SPMP_COUNT-1, 0x0, 0x100000000, 0, 7);
+  for (int i = 0; i < PMP_COUNT; i++) {
+    
+    addrs[i] = TEST_BASE + (i*0x1000);
+    init_instr_mem(addrs[i]);
+    if(i!=PMP_COUNT-1){
+    enable_pmp(i, addrs[i], 0x1000, 0, modeS_SUM_priv[i]);
+    }
+  }
+}
 void spmp_test_init_modeU() {
   for (int i = 0; i < SPMP_COUNT; i++) {
     test_priv[i] = 0;
@@ -83,6 +144,27 @@ void spmp_test_main(uint8_t* compare) {
   printf("sPMP test pass\n");
   // _halt(0);
 }
+void pmp_test_main(uint8_t* compare) {
+  for (int i = 0; i < SPMP_COUNT; i++) {
+    spmp_read_test( addrs[i]);
+    spmp_write_test(addrs[i]);
+    spmp_instr_test(addrs[i]);
+  }
+  bool wrong = 0;
+  for (int i = 0; i < SPMP_COUNT; i++) {
+    if (compare[i] != ((test_priv_PMP[i])&7)) {
+      printf("pmp[SRWX] %d:\tshould be %d, but %d\n", i, compare[i], (test_priv_PMP[i])&7);
+      wrong = 1;
+    }
+  }
+
+  if (wrong) {_halt(1);}
+  printf("PMP test pass\n");
+  // _halt(0);
+}
+void pmp_test_modeU() { pmp_test_main(modeU_priv_PMP); asm volatile("ecall;"); }
+void pmp_test_modeS() { pmp_test_main(modeS_priv_PMP); asm volatile("ecall;"); }
+void pmp_test_modeS_SUM() { pmp_test_main(modeS_SUM_priv_PMP); asm volatile("ecall;"); }
 
 void spmp_test_modeU() { spmp_test_main(modeU_priv); asm volatile("ecall;"); }
 void spmp_test_modeS() { spmp_test_main(modeS_priv); asm volatile("ecall;"); }

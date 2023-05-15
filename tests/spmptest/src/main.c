@@ -36,16 +36,32 @@ void test_entry() {
   disable_timer();
   flag++;
   if (flag == 1) {
+    pmp_test_init_modeU();
+    printf("start PMP U mode (sum=0/1) test\n");
+
+    MRET(1 << 3, pmp_test_modeU);
+  } else if (flag == 2) {
     spmp_test_init_modeU();
-    printf("start sPMP U mode (sum=0/1) test\n");
+    printf("start SPMP U mode (sum=0/1) test\n");
 
     MRET(1 << 3, spmp_test_modeU);
-  } else if (flag == 2) {
+  } else if (flag == 3) {
+    pmp_test_init_modeS_sum0();
+    printf("start PMP S mode (sum=0) test\n");
+
+    MRET(1 << 3|1 << 11, pmp_test_modeS);
+  } else if (flag == 4) {
     spmp_test_init_modeS();
     printf("start sPMP S mode (sum=0) test\n");
 
     MRET(1 << 3|1 << 11, spmp_test_modeS);
-  } else if (flag == 3) {
+  } else if (flag == 5) {
+    pmp_test_init_modeS_sum1();
+    _vme_init_custom(sv39_pgalloc, sv39_pgfree, segments, 2);
+    
+    printf("start PMP S mode (sum=1) test\n");
+    MRET(1 << 3|1 << 11|1 << 18, pmp_test_modeS_SUM);
+  } else if (flag == 6) {
     spmp_test_init_modeS();
     _vme_init_custom(sv39_pgalloc, sv39_pgfree, segments, 2);
     
@@ -58,6 +74,7 @@ void test_entry() {
 
 int main(const char *args) {
   _cte_init(simple_trap);
+  init_pmp_handler();
   init_spmp_handler();
   // printf("ecall\n");
   asm volatile("ecall;");

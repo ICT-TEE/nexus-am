@@ -69,3 +69,8 @@ void clean_spmp_all() {
   csr_write_num(SPMPCFG_BASE, 0L);
   csr_write_num(SPMPCFG_BASE + 2, 0L);
 }
+void clean_pmp_all() {
+  csr_write_num(PMPCFG_BASE, 0L);
+  csr_write_num(PMPCFG_BASE + 2, 0L);
+  init_pmp();
+}
