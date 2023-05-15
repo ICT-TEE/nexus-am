@@ -17,17 +17,17 @@ static uint8_t modeS_SUM_priv[SPMP_COUNT] = { // 0xwr,
   0, 0, 3, 3, 1, 1, 3, 3,
   0, 4, 4, 5, 1, 5, 3, 1
 };
-static uint8_t modeU_priv_PMP[SPMP_COUNT] = { // 0xwr,
+static uint8_t modeU_priv_PMP[PMP_COUNT] = { // 0xwr,
   7, 6, 5, 1, 5, 4, 1, 5, // switch 7,15
   7, 7, 6, 6, 7, 7, 7, 0
 };
 
-static uint8_t modeS_priv_PMP[SPMP_COUNT] = { // 0xwr,
+static uint8_t modeS_priv_PMP[PMP_COUNT] = { // 0xwr,
   7, 7, 1, 1, 7, 7, 7, 7,
   7, 6, 6, 4, 5, 4, 1, 0
 };
 
-static uint8_t modeS_SUM_priv_PMP[SPMP_COUNT] = { // 0xwr,
+static uint8_t modeS_SUM_priv_PMP[PMP_COUNT] = { // 0xwr,
   7, 7, 1, 1, 5, 5, 1, 1,
   7, 6, 6, 4, 5, 4, 1, 0
 };

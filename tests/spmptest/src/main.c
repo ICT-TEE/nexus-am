@@ -1,5 +1,8 @@
 #include <spmptest.h>
 
+//#define priority_test
+int priority_test ;
+char p ;
 void disable_timer();
 
 _Context *simple_trap(_Event, _Context *);
@@ -25,8 +28,8 @@ static void* sv39_pgalloc(size_t pg_size) {
 static void sv39_pgfree(void *ptr) {
   return ;
 }
-
-// count flag 1,2,3->modeU,modeS,modeS(sum=1)
+// count flag 1,3,5->PMP:modeU,modeS,modeS(sum=1)
+// count flag 2,4,6->SPMP:modeU,modeS,modeS(sum=1)
 static int flag = 0;
 #define MRET(MSTATUS, MEPC) asm volatile(       \
       "csrw mstatus, %0; csrw mepc, %1; mret;"  \
@@ -34,7 +37,13 @@ static int flag = 0;
 
 void test_entry() {
   disable_timer();
-  flag++;
+
+if(priority_test) 
+  {flag = flag + 1 ;}
+else 
+  {flag = flag + 2 ;}
+
+
   if (flag == 1) {
     pmp_test_init_modeU();
     printf("start PMP U mode (sum=0/1) test\n");
@@ -73,6 +82,8 @@ void test_entry() {
 }
 
 int main(const char *args) {
+  if(args[0] == 'p'){priority_test=1;}
+  else {priority_test=0;}
   _cte_init(simple_trap);
   init_pmp_handler();
   init_spmp_handler();
