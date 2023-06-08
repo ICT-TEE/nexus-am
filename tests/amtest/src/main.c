@@ -41,6 +41,7 @@ int main(const char *args) {
     CASE('g', sv39_ppn_af_test, IOE, CTE(simple_trap))
     CASE('b', cache_test);
     CASE('r', rtc_accuracy_test);
+    CASE('l', tlbmiss, CTE(simple_trap));
     case 'H':
     default:
       printf("Usage: make run mainargs=*\n");
