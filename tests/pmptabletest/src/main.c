@@ -2,7 +2,7 @@
 
 void init_pmptable() {
   asm volatile("csrw pmpcfg2, %0" : : "r"((long)24<<(8*7))); 
-  // enable_pmp_TOR(1, 0x0, 0x80000000, 0, PMP_R | PMP_W | PMP_X);
+  enable_pmp_TOR(0, 0x0, FIRST_AREA_END, 0, PMP_R | PMP_W | PMP_X);
 
   // all allow
   // csr_set_num(PMPCFG_BASE, 0x1fUL << (0*8));
@@ -21,8 +21,9 @@ void init_pmptable() {
 
   //////////////////////////////////////////
   // init second area: 0x90000000 -> 0x400000000
-  csr_set_num(PMPCFG_BASE, 0x38UL << (7*8));  // set pmpcfg7 napot and table mode
-  csr_write_num(PMPADDR_BASE + 7, 0x97ffffff >> 2);   // 2^(27+3) B, 0x90000000 -> 0xD0000000
+  csr_set_num(PMPCFG_BASE, 0x28UL << (7*8));  // set pmpcfg7 napot and table mode
+  csr_write_num(PMPADDR_BASE + 6, FIRST_AREA_END >> 2);
+  csr_write_num(PMPADDR_BASE + 7, MAX_ADDR >> 2);   //tor: 2^(27+3) B, 0x90000000 -> 0xD0000000
   csr_write_num(PMPADDR_BASE + 8, SECONE_PMPT_BASE >> 12);
 
   // asm volatile("sfence.vma");
@@ -31,10 +32,12 @@ void init_pmptable() {
 void (*en)();
 
 int main() {
-  // init_instr_mem(0x90000000UL);
-
-  for (int i = 21; i < 32; i++) {
-    add_tests(i);
+  // set random perm
+  srand(123);
+  for (int i = 0; i < TEST_MAX_NUM; i++) {
+    int p = (rand()*32)>>15;
+    // printf("%x\n", p);
+    add_tests(p);
   }
   asm volatile("sfence.vma");
 

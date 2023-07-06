@@ -45,7 +45,7 @@ void* alloc_super_page(int perm) {
   // write perm
   uint64_t* root_pte = (uint64_t *)get_table_addr(page_start, 0);
   *root_pte = (perm << 1)+1;
-  printf("write root pte 0x%lx: %x\n", (uint64_t)root_pte, perm);
+  // printf("write root pte 0x%lx: %x\n", (uint64_t)root_pte, perm);
 
   page_alloc_num += 1;
   return (void *)(page_start);

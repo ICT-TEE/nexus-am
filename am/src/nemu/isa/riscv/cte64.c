@@ -36,7 +36,7 @@ void __am_init_cte64() {
   // asm volatile("csrw pmpcfg2, %0" : : "r"(31));
   
   init_pmp();
-#if defined(__ARCH_RISCV64_XS_TEE) || 1
+#if defined(__ARCH_RISCV64_XS_TEE)
   printf("enable_pmptable\n");
   init_pmptable();
 

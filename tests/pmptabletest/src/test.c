@@ -31,7 +31,7 @@ void start_tests(int idx) {
     w_fault = false;
     x_fault = false;
 
-    printf("test addr: 0x%lx\n", test_addr[i]);
+    // printf("test addr: 0x%lx\n", test_addr[i]);
     pmp_rwx_test(test_addr[i]);
     // compare
     if (r_fault == (test_page_perm[i] & 0x1)||
