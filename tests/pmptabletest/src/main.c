@@ -2,7 +2,7 @@
 
 void init_pmptable() {
   asm volatile("csrw pmpcfg2, %0" : : "r"((long)24<<(8*7))); 
-  enable_pmp_TOR(0, 0x0, FIRST_AREA_END, 0, PMP_R | PMP_W | PMP_X);
+  // enable_pmp_TOR(0, 0x0, FIRST_AREA_END, 0, PMP_R | PMP_W | PMP_X);
 
   // all allow
   // csr_set_num(PMPCFG_BASE, 0x1fUL << (0*8));
@@ -29,16 +29,15 @@ void init_pmptable() {
   // asm volatile("sfence.vma");
 }
 
-void (*en)();
-
 int main() {
   // set random perm
-  srand(123);
-  for (int i = 0; i < TEST_MAX_NUM; i++) {
-    int p = (rand()*32)>>15;
-    // printf("%x\n", p);
-    add_tests(p);
-  }
+  srand(12);
+  // for (int i = 0; i < TEST_MAX_NUM; i++) {
+  //   int p = (rand()*32)>>15;
+  //   // printf("%x\n", p);
+  //   add_tests(p);
+  // }
+  init_rand_test();
   asm volatile("sfence.vma");
 
   _cte_init(simple_trap);
@@ -60,7 +59,8 @@ int main() {
   // }
   // asm volatile("sfence.vma");
   printf("start_test\n");
-  start_tests(-1);
+  // start_tests(-1);
+  start_rand_test(100);
 
   // uint64_t addr = (uint64_t)alloc_test_page(0x0, false);
   // asm volatile("sfence.vma");

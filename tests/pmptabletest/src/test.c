@@ -4,15 +4,10 @@ uint8_t test_page_perm[TEST_MAX_NUM];
 uint64_t test_addr[TEST_MAX_NUM];
 uint16_t test_num = 0;
 
-bool r_fault = false;
-bool w_fault = false;
-bool x_fault = false;
-
-volatile int result_blackhole = 0;
-void pmp_rwx_test(uint64_t addr) __attribute__((noinline));
+uint64_t rand_test_point[RAND_TEST_POINT];
 
 // add tests, p < 32, perm = p&0xf; super_page = p >> 4;
-void add_tests(uint8_t p) {
+void add_simple_test(uint8_t p) {
   assert(p < 32);
   test_page_perm[test_num] = p;
   test_addr[test_num] = (uint64_t)alloc_test_page(p&0xf, p>>4);
@@ -22,23 +17,19 @@ void add_tests(uint8_t p) {
 }
 
 // access test_addr, compare test_page_perm
-void start_tests(int idx) {
+void start_simple_tests(int idx) {
   int len = idx<0 ? test_num : idx+1;
   int i = idx<0? 0 : idx;
   for (; i < len; i++) {
     // clean
-    r_fault = false;
-    w_fault = false;
-    x_fault = false;
+    clean_current_perm();
 
     // printf("test addr: 0x%lx\n", test_addr[i]);
     pmp_rwx_test(test_addr[i]);
     // compare
-    if (r_fault == (test_page_perm[i] & 0x1)||
-        w_fault == ((test_page_perm[i] >> 1) & 0x1)||
-        x_fault == ((test_page_perm[i] >> 2) & 0x1)) {
+    if (get_current_perm() != (test_page_perm[i]&0x7)) {
       printf("wrong: idx: %d, addr: 0x%lx\n", i, test_addr[i]);
-      printf("xwr: %d,%d,%d <> %d\n", !x_fault, !w_fault, !r_fault, test_page_perm[i]&0x7);
+      printf("xwr: shuold be: 0x%x but: 0x%x\n", test_page_perm[i]&0x7, get_current_perm());
       uint64_t *root_addr = (uint64_t *)get_table_addr(test_addr[i], 0);
       printf("root pte addr: 0x%lx, data: 0x%lx\n", root_addr, *root_addr);
       _halt(1);
@@ -46,78 +37,65 @@ void start_tests(int idx) {
   }
 }
 
-_Context *simple_trap(_Event ev, _Context *ctx) {
-  switch(ev.event) {
-    case _EVENT_IRQ_TIMER:
-      printf("t"); break;
-    case _EVENT_IRQ_IODEV:
-      printf("d"); read_key(); break;
-    case _EVENT_YIELD:
-      printf("y"); break;
+uint64_t generate_rand_root_pte() {
+  uint64_t ppn = TEST_PMPT_BASE + NORMA_PAGE;
+  uint64_t rand_num = (rand() << 15) | rand();
+  uint64_t offset = (rand_num * ((1<<9)*(RAND_PAGE_NUM-1)))>>30;
+  ppn += offset << 3;
+  // printf("ppn: 0x%llx\n", ppn);
+  // 1/2 open leaf pte
+  uint64_t pte = (rand() & 0x1) ? ppn >> (12-5) : ((ppn >> 12)<<5)|0x1;
+  return pte;
+}
+
+uint64_t generate_rand_leaf_pte() {
+  uint64_t pte = 0;
+  for (int i=0; i<(64/15+1); i++) {
+    uint64_t rand_num = rand();
+    pte = pte | (rand_num << (i*15));
   }
-  return ctx;
+  return pte;
 }
 
-void init_instr_mem(uint64_t addr) {
-  uint32_t nop[3] = {0x00010001, 0x00010001, 0x00008082};
-  ((uint32_t*)addr)[0] = nop[0];
-  ((uint32_t*)addr)[1] = nop[1];
-  ((uint32_t*)addr)[2] = nop[2];
+void init_rand_test() {
+  for (int i = 0; i < RAND_TEST_POINT; i++) {
+    uint64_t rand_num = (rand()<<15)|rand();
+    rand_test_point[i] = TEST_BASE + ((rand_num % 0x370000) << 12);
+    printf("point: 0x%llx\n", rand_test_point[i]);
+    init_instr_mem(rand_test_point[i]);
+  }
+
+  // set random mem
+  uint64_t *root_base = (uint64_t *)TEST_PMPT_BASE;
+  for (int i = 0; i < (1<<9); i++) {
+    root_base[i] = generate_rand_root_pte();
+    // printf("root pte data: 0x%llx\n", root_base[i]);
+  }
+
+  for (int i = 0; i < RAND_PAGE_NUM-1; i++) {
+    uint64_t *leaf_base = (uint64_t *)(TEST_PMPT_BASE + NORMA_PAGE);
+    for (int j = 0; j < (1<<9); j++) {
+      leaf_base[j] = generate_rand_leaf_pte();
+      // printf("leaf pte data: 0x%llx\n", leaf_base[j]);
+    }
+  }
 }
 
-_Context* pmp_load_fault_handler(_Event* ev, _Context *c) {
-  // printf("r fault, sepc %lx\n", c->sepc);
-  r_fault = true;
-  // skip the inst that triggered the exception
-  c->sepc = inst_is_compressed(c->sepc) ? c->sepc + 2: c->sepc + 4; 
-  return c;
-}
+void start_rand_test(int n) {
+  for (int i = 0; i < n && i < RAND_TEST_POINT; i++) {
+    // clean
+    clean_current_perm();
 
-_Context* pmp_store_fault_handler(_Event* ev, _Context *c) {
-  // uint64_t stval;
-  // asm volatile("csrr %0, stval":"=r"(stval));
-  // printf("w fault, stval=0x%llx\n", stval);
-  // printf("w fault, sepc %lx\n", c->sepc);
-  // write ret
-  // *(uint32_t *)stval = 0x00008082;
-  w_fault = true;
-  // skip the inst that triggered the exception
-  c->sepc = inst_is_compressed(c->sepc) ? c->sepc + 2: c->sepc + 4; 
-  return c;
-}
+    pmp_rwx_test(rand_test_point[i]);
+    uint8_t perm = get_table_perm(rand_test_point[i]);
 
-_Context* pmp_instr_fault_handler(_Event* ev, _Context *c) {
-  // uint64_t stval;
-  // asm volatile("csrr %0, stval":"=r"(stval));
-  // printf("x fault, stval=0x%llx\n", stval);
-  // printf("x fault, sepc %lx\n", c->sepc);
-  x_fault = true;
-  // ret PC from a6
-  c->sepc = c->gpr[16];
-  return c;
-}
+    if (get_current_perm() != (perm&0x7)) {
+      printf("wrong: idx: %d, addr: 0x%lx\n", i, rand_test_point[i]);
+      printf("xwr: shuold be: 0x%x but: 0x%x\n", perm&0x7, get_current_perm());
 
-// for test
-void pmp_read_test(uint64_t addr) {
-  //printf("start read test");
-  volatile int *d = (int *)addr;
-  result_blackhole = (*d);
-}
-
-void pmp_write_test(uint64_t addr) {
-  //printf("start write test");
-  volatile uint32_t *a = (uint32_t *)addr;
-  *a = 0x00008082;    // write ret
-}
-
-void pmp_instr_test(uint64_t addr) {
-  asm volatile(
-    "jalr a6, 0(a0);"
-  );
-}
-
-void pmp_rwx_test(uint64_t addr) {
-  pmp_read_test(addr);
-  pmp_write_test(addr);
-  pmp_instr_test(addr);
+      uint64_t *root_addr = (uint64_t *)get_table_addr(rand_test_point[i], 0);
+      printf("root pte addr: 0x%lx, data: 0x%lx\n", root_addr, *root_addr);
+      _halt(1);
+    }
+  }
 }

@@ -21,11 +21,15 @@ void csr_write_num(int csr_num, unsigned long val);
 #define SECOND_AREA_END     MAX_ADDR
 #define FIRST_PMPT_BASE     0x80010000  // ->0x80020000, max page number: 15
 #define SECONE_PMPT_BASE    0x80020000  // ->0x90000000, max page number: 65504
-// test in second area, use second pmpt base
+// test in second area, use second pmpt base, only use front 670 page;
 #define TEST_BASE           FIRST_AREA_END
 #define TEST_PMPT_BASE      SECONE_PMPT_BASE
 
 #define TEST_MAX_NUM            128
+
+// rand addr, rand perm
+#define RAND_PAGE_NUM           8
+#define RAND_TEST_POINT         12
 
 // init
 inline int inst_is_compressed(uint64_t addr){
@@ -40,11 +44,21 @@ _Context* pmp_store_fault_handler(_Event* ev, _Context *c);
 _Context* pmp_instr_fault_handler(_Event* ev, _Context *c);
 
 // main
-void check(char type);
 void* get_table_addr(uint64_t addr, int level);
 void* alloc_test_page(int perm, bool super_page);
-void add_tests(uint8_t p);
-void start_tests(int idx);
-void pmp_rwx_test(uint64_t addr);
+uint8_t get_table_perm(uint64_t addr);
+
+// lib
+uint8_t get_current_perm();
+void clean_current_perm();
+void pmp_rwx_test(uint64_t addr) __attribute__((noinline));
+
+// simple test
+void add_simple_test(uint8_t p);
+void start_simple_tests(int idx);
+
+// random test
+void init_rand_test();
+void start_rand_test(int n);
 
 #endif
