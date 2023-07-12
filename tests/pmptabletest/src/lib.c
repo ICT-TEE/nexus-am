@@ -32,10 +32,11 @@ _Context *simple_trap(_Event ev, _Context *ctx) {
 }
 
 void init_instr_mem(uint64_t addr) {
-  uint32_t nop[3] = {0x00010001, 0x00010001, 0x00008082};
-  ((uint32_t*)addr)[0] = nop[0];
-  ((uint32_t*)addr)[1] = nop[1];
-  ((uint32_t*)addr)[2] = nop[2];
+  *((uint32_t*)addr) = 0x00008082;
+  // uint32_t nop[3] = {0x00010001, 0x00010001, 0x00008082};
+  // ((uint32_t*)addr)[0] = nop[0];
+  // ((uint32_t*)addr)[1] = nop[1];
+  // ((uint32_t*)addr)[2] = nop[2];
 }
 
 _Context* pmp_load_fault_handler(_Event* ev, _Context *c) {

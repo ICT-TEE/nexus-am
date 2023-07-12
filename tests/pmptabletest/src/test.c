@@ -17,7 +17,7 @@ void add_simple_test(uint8_t p) {
 }
 
 // access test_addr, compare test_page_perm
-void start_simple_tests(int idx) {
+void start_simple_tests(uint16_t idx) {
   int len = idx<0 ? test_num : idx+1;
   int i = idx<0? 0 : idx;
   for (; i < len; i++) {
@@ -57,22 +57,23 @@ uint64_t generate_rand_leaf_pte() {
   return pte;
 }
 
-void init_rand_test() {
-  for (int i = 0; i < RAND_TEST_POINT; i++) {
+void init_rand_test(uint16_t max_pages, uint16_t max_test_points) {
+  for (int i = 0; i < RAND_TEST_POINT && i < max_test_points; i++) {
     uint64_t rand_num = (rand()<<15)|rand();
-    rand_test_point[i] = TEST_BASE + ((rand_num % 0x370000) << 12);
-    printf("point: 0x%llx\n", rand_test_point[i]);
+    rand_test_point[i] = TEST_BASE + ((rand_num % ((MAX_ADDR-TEST_BASE)>>12)) << 12);
+    // printf("point: 0x%llx\n", rand_test_point[i]);
     init_instr_mem(rand_test_point[i]);
   }
 
   // set random mem
+  printf("set random mem\n");
   uint64_t *root_base = (uint64_t *)TEST_PMPT_BASE;
   for (int i = 0; i < (1<<9); i++) {
     root_base[i] = generate_rand_root_pte();
     // printf("root pte data: 0x%llx\n", root_base[i]);
   }
 
-  for (int i = 0; i < RAND_PAGE_NUM-1; i++) {
+  for (int i = 0; i < (RAND_PAGE_NUM-1) && i < (max_pages-1); i++) {
     uint64_t *leaf_base = (uint64_t *)(TEST_PMPT_BASE + NORMA_PAGE);
     for (int j = 0; j < (1<<9); j++) {
       leaf_base[j] = generate_rand_leaf_pte();
@@ -81,7 +82,7 @@ void init_rand_test() {
   }
 }
 
-void start_rand_test(int n) {
+void start_rand_test(uint16_t n) {
   for (int i = 0; i < n && i < RAND_TEST_POINT; i++) {
     // clean
     clean_current_perm();

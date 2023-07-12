@@ -29,47 +29,52 @@ void init_pmptable() {
   // asm volatile("sfence.vma");
 }
 
-int main() {
-  // set random perm
-  srand(12);
-  // for (int i = 0; i < TEST_MAX_NUM; i++) {
-  //   int p = (rand()*32)>>15;
-  //   // printf("%x\n", p);
-  //   add_tests(p);
-  // }
-  init_rand_test();
-  asm volatile("sfence.vma");
-
+void init_cte() {
   _cte_init(simple_trap);
   irq_handler_reg(EXCEPTION_STORE_ACCESS_FAULT, &pmp_store_fault_handler);
   irq_handler_reg(EXCEPTION_LOAD_ACCESS_FAULT, &pmp_load_fault_handler);
   irq_handler_reg(EXCEPTION_INST_ACCESS_FAULT, &pmp_instr_fault_handler);
+}
 
-  // uint64_t *root = (uint64_t *)(0x20400000UL);
-  // uint64_t *leaf = (uint64_t *)TABLE_BASE + 0x1000;
-  // uint64_t addr = (uint64_t)alloc_test_page(0x0, true);
-  // printf("addr: 0x%x\n", addr);
-  // addr = (uint64_t)alloc_test_page(0x0, false);
-  // printf("addr: 0x%x\n", addr);
+/**
+ * mainargs:  s(Simple Test, fast)
+ *            r(Rand Test, slow)
+ *            a(Rand Test, very slow)
+ * default: r
+ */
+int main(const char *args) {
+  // set random perm
+  srand(2);
+  // printf("_bss: 0x%lx end: 0x%lx\n", _stack_top, end);
 
-  // for (int i = 0; i < 17; i++) {
-  //   add_tests(i);
-  //   asm volatile("sfence.vma");
-  //   start_tests(i);
-  // }
-  // asm volatile("sfence.vma");
-  printf("start_test\n");
-  // start_tests(-1);
-  start_rand_test(100);
+  if (args[0] == 's') {
+    for (int i = 0; i < TEST_MAX_NUM; i++) {
+      int p = (rand()*32)>>15;
+      // printf("%x\n", p);
+      add_simple_test(p);
+    }
+    asm volatile("sfence.vma");
+    init_cte();
 
-  // uint64_t addr = (uint64_t)alloc_test_page(0x0, false);
-  // asm volatile("sfence.vma");
-  // printf("addr: 0x%x\n", addr);
-  // pmp_rwx_test(addr);
-  // int *b = (int *)(addr);
-  // *b = 1;
-  // en = (void*)(addr);
-  // (*en)();
+    printf("start simple test\n");
+    start_simple_tests(-1);
+
+  } else if (args[0] == 'a') {
+    init_rand_test(-1, -1);
+    asm volatile("sfence.vma");
+    init_cte();
+
+    printf("start rand test (large)\n");
+    start_rand_test(-1);
+
+  } else {
+    init_rand_test(8, 15);
+    asm volatile("sfence.vma");
+    init_cte();
+
+    printf("start rand test (fast)\n");
+    start_rand_test(15);
+  }
 
   printf("PASS!\n");
   return 0;

@@ -16,11 +16,11 @@ void csr_write_num(int csr_num, unsigned long val);
 #define NORMA_PAGE 0x1000UL
 #define SUPER_PAGE 0x2000000UL
 
-#define MAX_ADDR            0x400000000 // 16GB
+#define MAX_ADDR            0x200000000 // 8GB
 #define FIRST_AREA_END      0x90000000
 #define SECOND_AREA_END     MAX_ADDR
-#define FIRST_PMPT_BASE     0x80010000  // ->0x80020000, max page number: 15
-#define SECONE_PMPT_BASE    0x80020000  // ->0x90000000, max page number: 65504
+#define FIRST_PMPT_BASE     0x80100000  // ->0x80110000, max page number: 15
+#define SECONE_PMPT_BASE    0x80110000  // ->0x90000000, max page number: 65,264
 // test in second area, use second pmpt base, only use front 670 page;
 #define TEST_BASE           FIRST_AREA_END
 #define TEST_PMPT_BASE      SECONE_PMPT_BASE
@@ -28,8 +28,8 @@ void csr_write_num(int csr_num, unsigned long val);
 #define TEST_MAX_NUM            128
 
 // rand addr, rand perm
-#define RAND_PAGE_NUM           8
-#define RAND_TEST_POINT         12
+#define RAND_PAGE_NUM           1024
+#define RAND_TEST_POINT         4096
 
 // init
 inline int inst_is_compressed(uint64_t addr){
@@ -55,10 +55,10 @@ void pmp_rwx_test(uint64_t addr) __attribute__((noinline));
 
 // simple test
 void add_simple_test(uint8_t p);
-void start_simple_tests(int idx);
+void start_simple_tests(uint16_t idx);
 
 // random test
-void init_rand_test();
-void start_rand_test(int n);
+void init_rand_test(uint16_t max_pages, uint16_t max_test_points);
+void start_rand_test(uint16_t n);
 
 #endif
