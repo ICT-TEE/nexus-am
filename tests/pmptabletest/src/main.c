@@ -67,6 +67,20 @@ int main(const char *args) {
     printf("start rand test (large)\n");
     start_rand_test(-1);
 
+  } else if (args[0] == 't') {
+    for (int i = 0; i < TEST_MAX_NUM; i++) {
+      // int p = (rand()*32)>>15;
+      // printf("%x\n", p);
+      // add_simple_test(rand()&0xf);
+      add_simple_test(0);
+    }
+    sv39_init();
+    asm volatile("sfence.vma");
+    init_cte();
+
+    printf("start simple test\n");
+    start_simple_tests(-1);
+
   } else {
     init_rand_test(8, 15);
     asm volatile("sfence.vma");

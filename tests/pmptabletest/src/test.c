@@ -17,7 +17,7 @@ void add_simple_test(uint8_t p) {
 }
 
 // access test_addr, compare test_page_perm
-void start_simple_tests(uint16_t idx) {
+void start_simple_tests(int idx) {
   int len = idx<0 ? test_num : idx+1;
   int i = idx<0? 0 : idx;
   for (; i < len; i++) {
