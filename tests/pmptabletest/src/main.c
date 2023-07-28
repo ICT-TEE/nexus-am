@@ -71,8 +71,8 @@ int main(const char *args) {
     for (int i = 0; i < TEST_MAX_NUM; i++) {
       // int p = (rand()*32)>>15;
       // printf("%x\n", p);
-      // add_simple_test(rand()&0xf);
-      add_simple_test(0);
+      add_simple_test(rand()&0xf);
+      // add_simple_test(0);
     }
     sv39_init();
     asm volatile("sfence.vma");
