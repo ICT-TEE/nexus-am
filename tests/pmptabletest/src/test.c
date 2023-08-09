@@ -9,7 +9,7 @@ uint64_t rand_test_point[RAND_TEST_POINT];
 // add tests, p < 32, perm = p&0xf; super_page = p >> 4;
 void add_simple_test(uint8_t p) {
   assert(p < 32);
-  test_page_perm[test_num] = p;
+  test_page_perm[test_num] = (p & 0b11) == 0b10 ? p & 0b11100 : p;
   test_addr[test_num] = (uint64_t)alloc_test_page(p&0xf, p>>4);
   init_instr_mem(test_addr[test_num]);
 

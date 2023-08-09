@@ -58,6 +58,7 @@ uint8_t get_table_perm(uint64_t addr) {
     perm = (root_pte >> 1) & 0xf;
     // printf("hit root pte\n");
   }
+  perm = (perm & 0b11) == 0b10 ? perm & 0b1100 : perm;
 
   return perm;
 }
