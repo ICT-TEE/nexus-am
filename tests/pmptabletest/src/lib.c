@@ -72,26 +72,58 @@ _Context* pmp_instr_fault_handler(_Event* ev, _Context *c) {
 }
 
 // for test
-void pmp_read_test(uint64_t addr) {
+inline void pmp_read_test(uint64_t addr) {
   //printf("start read test");
   volatile int *d = (int *)addr;
   result_blackhole = (*d);
 }
 
-void pmp_write_test(uint64_t addr) {
+inline void pmp_write_test(uint64_t addr) {
   //printf("start write test");
   volatile uint32_t *a = (uint32_t *)addr;
   *a = 0x00080067;    // write ret
 }
 
-void pmp_instr_test(uint64_t addr) {
+inline void pmp_instr_test(uint64_t addr) {
   asm volatile(
     "jalr a6, 0(a0);"
+    :::"a6"
+  );
+}
+
+inline void pmp_amo_lr_test(uint64_t addr) {
+  asm volatile(
+    "lr.d s5, (a0);"
+    :::"s5","s6"
+  );
+}
+
+inline void pmp_amo_sc_test(uint64_t addr) {
+  asm volatile(
+    "li s5, 0x00080067;"
+    "sc.d s5, s5, (a0);"
+    :::"s4","s5","s6"
+  );
+}
+
+inline void pmp_amo_write_test(uint64_t addr) {
+  asm volatile(
+    "li s6, 0;"
+    "amoadd.d s5, s6, (a0);"
+    :::"s4","s5","s6"
   );
 }
 
 void pmp_rwx_test(uint64_t addr) {
   pmp_read_test(addr);
   pmp_write_test(addr);
+  pmp_instr_test(addr);
+}
+
+void pmp_amo_test(uint64_t addr) {
+  // pmp_read_test(addr);
+  pmp_amo_lr_test(addr);
+  pmp_amo_sc_test(addr);
+  // pmp_amo_write_test(addr);
   pmp_instr_test(addr);
 }

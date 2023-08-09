@@ -37,8 +37,9 @@ void init_cte() {
 }
 
 /**
- * mainargs:  s(Simple Test, fast)
- *            r(Rand Test, slow)
+ * mainargs:  s(Simple Test, include amo test)
+ *            t(Simple Test with sv39, include amo test)
+ *            r(Rand Test)
  *            a(Rand Test, very slow)
  * default: r
  */
@@ -57,7 +58,10 @@ int main(const char *args) {
     init_cte();
 
     printf("start simple test\n");
-    start_simple_tests(-1);
+    start_simple_tests(-1, false);
+    printf("rwx test pass\n");
+    start_simple_tests(-1, true);
+    printf("amo test pass\n");
 
   } else if (args[0] == 'a') {
     init_rand_test(-1, -1);
@@ -79,7 +83,10 @@ int main(const char *args) {
     init_cte();
 
     printf("start simple test\n");
-    start_simple_tests(-1);
+    start_simple_tests(-1, false);
+    printf("rwx test pass\n");
+    start_simple_tests(-1, true);
+    printf("amo test pass\n");
 
   } else {
     init_rand_test(8, 15);

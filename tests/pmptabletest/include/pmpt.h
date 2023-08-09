@@ -53,10 +53,11 @@ uint8_t get_table_perm(uint64_t addr);
 uint8_t get_current_perm();
 void clean_current_perm();
 void pmp_rwx_test(uint64_t addr) __attribute__((noinline));
+void pmp_amo_test(uint64_t addr) __attribute__((noinline));
 
 // simple test
 void add_simple_test(uint8_t p);
-void start_simple_tests(int idx);
+void start_simple_tests(int idx, bool amo);
 
 // random test
 void init_rand_test(uint16_t max_pages, uint16_t max_test_points);
