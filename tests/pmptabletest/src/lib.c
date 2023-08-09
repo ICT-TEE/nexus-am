@@ -32,7 +32,7 @@ _Context *simple_trap(_Event ev, _Context *ctx) {
 }
 
 void init_instr_mem(uint64_t addr) {
-  *((uint32_t*)addr) = 0x00008082;
+  *((uint32_t*)addr) = 0x00080067;
   // uint32_t nop[3] = {0x00010001, 0x00010001, 0x00008082};
   // ((uint32_t*)addr)[0] = nop[0];
   // ((uint32_t*)addr)[1] = nop[1];
@@ -81,7 +81,7 @@ void pmp_read_test(uint64_t addr) {
 void pmp_write_test(uint64_t addr) {
   //printf("start write test");
   volatile uint32_t *a = (uint32_t *)addr;
-  *a = 0x00008082;    // write ret
+  *a = 0x00080067;    // write ret
 }
 
 void pmp_instr_test(uint64_t addr) {

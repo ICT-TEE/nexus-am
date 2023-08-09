@@ -5,6 +5,8 @@
 static _Area segments[] = {      // Kernel memory mappings
   RANGE_LEN(0x80000000, 0x100000), // PMEM
   RANGE_LEN(0x40600000, 0x1000),    // uart
+  RANGE_LEN(FIRST_PMPT_BASE, 0x1000),
+  RANGE_LEN(SECONE_PMPT_BASE, 0x10000),
   RANGE_LEN(TEST_BASE, 0x100000),    // test
 };
 
@@ -23,5 +25,5 @@ static void sv39_pgfree(void *ptr) {
 }
 
 void sv39_init() {
-  _vme_init_custom(sv39_pgalloc, sv39_pgfree, segments, 3);
+  _vme_init_custom(sv39_pgalloc, sv39_pgfree, segments, 5);
 }
