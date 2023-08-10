@@ -1,6 +1,8 @@
 #include "pmpt.h"
 
-// get table addr by current addr and level
+/**
+ * get table addr by current addr and level
+ */
 void* get_table_addr(uint64_t addr, int level) {
   assert(level == 0 || level == 1);
   assert(addr >= TEST_BASE);
@@ -27,7 +29,9 @@ void check(char type) {
   return;
 }
 
-// get rwx permission by addr, addr must in second area
+/**
+ * get rwx permission by addr, addr must in second area
+ */
 uint8_t get_table_perm(uint64_t addr) {
   if (addr < TEST_BASE || addr >= MAX_ADDR) {
     printf("wrong addr\n");

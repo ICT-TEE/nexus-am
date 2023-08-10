@@ -19,9 +19,9 @@ void csr_write_num(int csr_num, unsigned long val);
 #define MAX_ADDR            0x200000000 // 8GB
 #define FIRST_AREA_END      0xa0000000
 #define SECOND_AREA_END     MAX_ADDR
-#define SV39_PAGE_BASE      0x90000000  // max page number: 3840
-#define FIRST_PMPT_BASE     0x91000000  // ->0x81010000, max page number: 15
-#define SECONE_PMPT_BASE    0x91010000  // ->0x90000000, max page number: 61,424
+#define SV39_PAGE_BASE      0x90000000
+#define FIRST_PMPT_BASE     0x91000000  // ->SECONE_PMPT_BASE
+#define SECONE_PMPT_BASE    0x91010000  // ->FIRST_AREA_END
 // test in second area, use second pmpt base, only use front 670 page;
 #define TEST_BASE           FIRST_AREA_END
 #define TEST_PMPT_BASE      SECONE_PMPT_BASE
@@ -46,7 +46,6 @@ _Context* pmp_instr_fault_handler(_Event* ev, _Context *c);
 
 // main
 void* get_table_addr(uint64_t addr, int level);
-void* alloc_test_page(int perm, bool super_page);
 uint8_t get_table_perm(uint64_t addr);
 
 // lib
