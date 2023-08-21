@@ -4,9 +4,9 @@
 
 #define EXCEPTION_U_ECALL 8
 #define EXCEPTION_S_ECALL 9
-#define EXCEPTION_INSTR_SPMP_FAULT 16
-#define EXCEPTION_LOAD_SPMP_FAULT 17
-#define EXCEPTION_STORE_SPMP_FAULT 18
+#define EXCEPTION_INSTR_SPMP_FAULT 1
+#define EXCEPTION_LOAD_SPMP_FAULT 5
+#define EXCEPTION_STORE_SPMP_FAULT 7
 
 inline int inst_is_compressed(uint64_t addr){
   uint8_t byte = *(uint8_t*)addr;
@@ -71,17 +71,17 @@ void init_spmp_handler() {
 }
 
 // for test
-void spmp_read_test(uint64_t addr) {
+inline void spmp_read_test(uint64_t addr) {
   volatile int *d = (int *)addr;
   result_blackhole = (*d);
 }
 
-void spmp_write_test(uint64_t addr) {
+inline void spmp_write_test(uint64_t addr) {
   volatile uint32_t *a = (uint32_t *)addr;
-  *a = 0x00010001;    // write NOP
+  *a = 0x00080067;    // write NOP
 }
 
-void spmp_instr_test(uint64_t addr) {
+inline void spmp_instr_test(uint64_t addr) {
   asm volatile(
     "jalr a6, 0(a0);"
   );
@@ -91,4 +91,10 @@ void spmp_instr_test(uint64_t addr) {
   //   "nop;"
   //   "ret"
   // );
+}
+
+void spmp_rwx_test(uint64_t addr) {
+  spmp_read_test(addr);
+  spmp_write_test(addr);
+  spmp_instr_test(addr);
 }

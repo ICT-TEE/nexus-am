@@ -25,7 +25,7 @@ static void init_eip() {
 void __am_init_cte64() {
   // set delegation (do not deleg illegal instruction exception)
   asm volatile("csrw mideleg, %0" : : "r"(0xffff));
-  asm volatile("csrw medeleg, %0" : : "r"(0xf8fb));
+  asm volatile("csrw medeleg, %0" : : "r"(0xf859));
 
   // set PMP to access all memory in S-mode
   // asm volatile("csrw pmpaddr8, %0" : : "r"(-1));

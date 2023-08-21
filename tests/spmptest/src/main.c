@@ -33,6 +33,7 @@ static int flag = 0;
       : : "r"(MSTATUS), "r"(MEPC))
 
 void test_entry() {
+  printf("test entry\n");
   disable_timer();
   flag++;
   if (flag == 1) {
