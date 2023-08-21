@@ -10,21 +10,22 @@ static uint8_t modeU_priv[SPMP_COUNT] = { // 0xwr,
 
 static uint8_t modeS_priv[SPMP_COUNT] = { // 0xwr,
   0, 0, 3, 3, 0, 0, 0, 0,
-  0, 4, 4, 5, 1, 5, 3, 1
+  7, 4, 4, 5, 1, 5, 3, 1
 };
 
 static uint8_t modeS_SUM_priv[SPMP_COUNT] = { // 0xwr,
   0, 0, 3, 3, 1, 1, 3, 3,
-  0, 4, 4, 5, 1, 5, 3, 1
+  7, 4, 4, 5, 1, 5, 3, 1
 };
 
 extern uint8_t test_priv[SPMP_COUNT];
 
 void init_instr_mem(uint64_t addr) {
-  uint32_t nop[3] = {0x00010001, 0x00010001, 0x00080067};
-  ((uint32_t*)addr)[0] = nop[0];
-  ((uint32_t*)addr)[1] = nop[1];
-  ((uint32_t*)addr)[2] = nop[2];
+  *((uint32_t*)addr) = 0x00080067;
+  // uint32_t nop[3] = {0x00010001, 0x00010001, 0x00080067};
+  // ((uint32_t*)addr)[0] = nop[0];
+  // ((uint32_t*)addr)[1] = nop[1];
+  // ((uint32_t*)addr)[2] = nop[2];
 }
 
 void spmp_test_init_modeU() {
@@ -66,10 +67,10 @@ void spmp_test_init_modeS() {
 }
 
 void spmp_test_main(uint8_t* compare) {
+  printf("start main test\n");
   for (int i = 0; i < SPMP_COUNT; i++) {
-    spmp_read_test( addrs[i]);
-    spmp_write_test(addrs[i]);
-    spmp_instr_test(addrs[i]);
+    // printf("%d\n",i);
+    spmp_rwx_test( addrs[i]);
   }
   bool wrong = 0;
   for (int i = 0; i < SPMP_COUNT; i++) {

@@ -19,9 +19,10 @@ void clean_spmp_all();
 
 void init_spmp_handler();
 
-void spmp_write_test(uint64_t addr);
-void spmp_read_test(uint64_t addr);
-void spmp_instr_test(uint64_t addr);
+// void spmp_write_test(uint64_t addr);
+// void spmp_read_test(uint64_t addr);
+// void spmp_instr_test(uint64_t addr);
+void spmp_rwx_test(uint64_t addr) __attribute__((noinline));
 
 void spmp_test_init_modeU();
 void spmp_test_init_modeS();
