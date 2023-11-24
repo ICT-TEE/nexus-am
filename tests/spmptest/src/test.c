@@ -48,6 +48,7 @@ void spmp_test_init_modeU() {
       enable_spmp(i, addrs[i], 0x1000, i >> 3, (x<<2)|(w<<1)|(r));
     }
   }
+  init_instr_mem(0x100000000);
 }
 
 void spmp_test_init_modeS() {
@@ -70,6 +71,7 @@ void spmp_test_init_modeS() {
       enable_spmp(i, addrs[i], 0x1000, i >> 3, (x<<2)|(w<<1)|(r));
     }
   }
+  init_instr_mem(0x100000000);
 }
 
 void spmp_test_main(uint8_t* compare) {
@@ -84,6 +86,13 @@ void spmp_test_main(uint8_t* compare) {
       printf("[SRWX] %d:\tshould be %d, but %d\n", i, compare[i], (~test_priv[i])&7);
       wrong = 1;
     }
+  }
+  // test default case
+  test_priv[0] = 0;
+  spmp_rwx_test(0x100000000);
+  if (compare[0] != ((~test_priv[0])&7)) {
+    printf("default [SRWX] %d:\tshould be %d, but %d\n", 0, compare[0], (~test_priv[0])&7);
+    wrong = 1;
   }
 
   if (wrong) {_halt(1);}

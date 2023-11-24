@@ -10,6 +10,7 @@ _Context *simple_trap(_Event, _Context *);
 static _Area segments[] = {      // Kernel memory mappings
   RANGE_LEN(0x80000000, 0x100000), // PMEM
   RANGE_LEN(0x40600000, 0x1000),    // uart
+  RANGE_LEN(0x100000000, 0x1000),    // no sPMP match
 };
 
 static char *sv39_alloc_base = (char *)(0xc0000000UL);
@@ -48,7 +49,7 @@ void test_entry() {
     MRET(1 << 3|1 << 11, spmp_test_modeS);
   } else if (flag == 3) {
     spmp_test_init_modeS();
-    _vme_init_custom(sv39_pgalloc, sv39_pgfree, segments, 2);
+    _vme_init_custom(sv39_pgalloc, sv39_pgfree, segments, 3);
     
     printf("start sPMP S mode (sum=1) test\n");
     MRET(1 << 3|1 << 11|1 << 18, spmp_test_modeS_SUM);
