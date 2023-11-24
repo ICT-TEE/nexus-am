@@ -5,17 +5,17 @@ static uint64_t addrs[SPMP_COUNT];
 // U mode Exception map, for S,R,W,X <- 0 to 15, 
 static uint8_t modeU_priv[SPMP_COUNT] = { // 0xwr,
   0, 4, 1, 3, 1, 5, 3, 1, // switch 7,15
-  0, 0, 4, 4, 0, 0, 0, 7
+  7, 0, 4, 4, 0, 0, 0, 7
 };
 
 static uint8_t modeS_priv[SPMP_COUNT] = { // 0xwr,
   0, 0, 3, 3, 0, 0, 0, 0,
-  7, 4, 4, 5, 1, 5, 3, 1
+  1, 4, 4, 5, 1, 5, 3, 7  // switch 8,15
 };
 
 static uint8_t modeS_SUM_priv[SPMP_COUNT] = { // 0xwr,
   0, 0, 3, 3, 1, 1, 3, 3,
-  7, 4, 4, 5, 1, 5, 3, 1
+  1, 4, 4, 5, 1, 5, 3, 7  // switch 8,15
 };
 
 extern uint8_t test_priv[SPMP_COUNT];
@@ -55,14 +55,20 @@ void spmp_test_init_modeS() {
     test_priv[i] = 0;
   }
   clean_spmp_all();
+  enable_spmp(8, TEST_BASE+0x8000, 0x1000, 1, 7);
+  enable_spmp(SPMP_COUNT-1, 0x0, 0x100000000, 1, 0);
+
   for (int i = 0; i < SPMP_COUNT; i++) {
     uint8_t r = (i >> 2) & 1;
     uint8_t w = (i >> 1) & 1;
     uint8_t x = i & 1;
 
     addrs[i] = TEST_BASE + (i*0x1000);
-    enable_spmp(i, addrs[i], 0x1000, i >> 3, (x<<2)|(w<<1)|(r));
     init_instr_mem(addrs[i]);
+
+    if (i!=8 && i!=SPMP_COUNT-1) {
+      enable_spmp(i, addrs[i], 0x1000, i >> 3, (x<<2)|(w<<1)|(r));
+    }
   }
 }
 

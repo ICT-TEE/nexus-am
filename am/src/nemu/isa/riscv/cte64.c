@@ -22,6 +22,8 @@ static void init_eip() {
   asm volatile("csrs mstatus, %0" : : "r"(1 << 3));
 }
 
+extern void init_spmp();
+
 void __am_init_cte64() {
   // set delegation (do not deleg illegal instruction exception)
   asm volatile("csrw mideleg, %0" : : "r"(0xffff));
@@ -32,6 +34,7 @@ void __am_init_cte64() {
   // asm volatile("csrw pmpcfg2, %0" : : "r"(31));
   
   init_pmp();
+  init_spmp();
 #if defined(__ARCH_RISCV64_NOOP) || defined(__ARCH_RISCV32_NOOP) || defined(__ARCH_RISCV64_XS)
   // protect 0x90000000 + 0x10000 for test purpose
   printf("enable_pmp\n");
