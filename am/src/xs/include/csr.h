@@ -22,6 +22,7 @@
 #define CSR_PMPADDR0 0x3b0
 
 // for spmp
+#define SPMP_SWITCH 0x19f
 #define SPMPCFG_BASE 0x1a0
 #define SPMPADDR_BASE 0x1b0
 
