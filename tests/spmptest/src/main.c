@@ -60,6 +60,7 @@ void test_entry() {
 
 int main(const char *args) {
   _cte_init(simple_trap);
+  csr_set(SPMP_SWITCH, 0x1);
   init_spmp_handler();
   // printf("ecall\n");
   asm volatile("ecall;");
