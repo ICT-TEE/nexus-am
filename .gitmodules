@@ -1,0 +1,3 @@
+[submodule "tests/nanhu_rot_test"]
+	path = tests/nanhu_rot_test
+	url = https://github.com/PENGLAI-ZGC-TEE/nanhu_rot_test.git
