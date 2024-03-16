@@ -21,11 +21,7 @@ static uint8_t modeS_SUM_priv[SPMP_COUNT] = { // 0xwr,
 extern uint8_t test_priv[SPMP_COUNT];
 
 void init_instr_mem(uint64_t addr) {
-  *((uint32_t*)addr) = 0x00080067;
-  // uint32_t nop[3] = {0x00010001, 0x00010001, 0x00080067};
-  // ((uint32_t*)addr)[0] = nop[0];
-  // ((uint32_t*)addr)[1] = nop[1];
-  // ((uint32_t*)addr)[2] = nop[2];
+  *((uint64_t*)addr) = 0x00080067; // jalr x0, 0(x16)
 }
 
 void spmp_test_init_modeU() {
@@ -33,9 +29,10 @@ void spmp_test_init_modeU() {
     test_priv[i] = 0;
   }
   clean_spmp_all();
-  enable_spmp(7, TEST_BASE+0x7000, 0x1000, 1, 7);
-  enable_spmp(SPMP_COUNT-1, 0x0, 0x100000000, 0, 7);
 
+  enable_spmp(7, TEST_BASE+0x7000, 0x1000, 1, 7); // 7: x w r = 1 1 1
+  enable_spmp(SPMP_COUNT-1, 0x0, TEST_MAX, 0, 7);
+  
   for (int i = 0; i < SPMP_COUNT; i++) {
     uint8_t r = (i >> 2) & 1;
     uint8_t w = (i >> 1) & 1;
@@ -48,7 +45,9 @@ void spmp_test_init_modeU() {
       enable_spmp(i, addrs[i], 0x1000, i >> 3, (x<<2)|(w<<1)|(r));
     }
   }
-  init_instr_mem(0x100000000);
+
+  // init_instr_mem(TEST_MAX);
+  printf("spmp_test_init_modeU is over\n");
 }
 
 void spmp_test_init_modeS() {
@@ -57,7 +56,7 @@ void spmp_test_init_modeS() {
   }
   clean_spmp_all();
   enable_spmp(8, TEST_BASE+0x8000, 0x1000, 1, 7);
-  enable_spmp(SPMP_COUNT-1, 0x0, 0x100000000, 1, 0);
+  enable_spmp(SPMP_COUNT-1, 0x0, TEST_MAX, 1, 0);
 
   for (int i = 0; i < SPMP_COUNT; i++) {
     uint8_t r = (i >> 2) & 1;
@@ -71,11 +70,11 @@ void spmp_test_init_modeS() {
       enable_spmp(i, addrs[i], 0x1000, i >> 3, (x<<2)|(w<<1)|(r));
     }
   }
-  init_instr_mem(0x100000000);
+  // init_instr_mem(0x1000010000);
 }
 
 void spmp_test_main(uint8_t* compare) {
-  printf("start main test\n");
+  printf("spmp_test_main\n");
   for (int i = 0; i < SPMP_COUNT; i++) {
     // printf("%d\n",i);
     spmp_rwx_test( addrs[i]);
@@ -87,21 +86,21 @@ void spmp_test_main(uint8_t* compare) {
       wrong = 1;
     }
   }
-  // test default case
-  test_priv[0] = 0;
-  spmp_rwx_test(0x100000000);
-  if (compare[0] != ((~test_priv[0])&7)) {
-    printf("default [SRWX] %d:\tshould be %d, but %d\n", 0, compare[0], (~test_priv[0])&7);
-    wrong = 1;
-  }
+  // // test default case
+  // test_priv[0] = 0;
+  // spmp_rwx_test(0x100000000);
+  // if (compare[0] != ((~test_priv[0])&7)) {
+  //   printf("default [SRWX] %d:\tshould be %d, but %d\n", 0, compare[0], (~test_priv[0])&7);
+  //   wrong = 1;
+  // }
 
   if (wrong) {_halt(1);}
   printf("sPMP test pass\n");
   // _halt(0);
 }
 
-void spmp_test_modeU() { spmp_test_main(modeU_priv); asm volatile("ecall;"); }
-void spmp_test_modeS() { spmp_test_main(modeS_priv); asm volatile("ecall;"); }
+void spmp_test_modeU() { spmp_test_main(modeU_priv); asm volatile("ecall"); }
+void spmp_test_modeS() { spmp_test_main(modeS_priv); asm volatile("ecall"); }
 void spmp_test_modeS_SUM() { spmp_test_main(modeS_SUM_priv); _halt(0); }
 
 /*

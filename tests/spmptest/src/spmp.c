@@ -58,7 +58,7 @@ void test_entry();
 _Context* s2m(_Event* ev, _Context *c) {
   printf("to M mode\n");
   test_entry();
-  c->sepc = 0;
+  c->sepc = 0; // mret pc is 0?
   return c;
 }
 
@@ -78,19 +78,13 @@ inline void spmp_read_test(uint64_t addr) {
 
 inline void spmp_write_test(uint64_t addr) {
   volatile uint32_t *a = (uint32_t *)addr;
-  *a = 0x00080067;    // write NOP
+  *a = 0x00080067;    // jalr x0, 0(x16)
 }
 
 inline void spmp_instr_test(uint64_t addr) {
   asm volatile(
-    "jalr a6, 0(a0);"
+    "jalr a6, 0(a0)"
   );
-  // asm volatile(
-  //   "nop;"
-  //   "nop;"
-  //   "nop;"
-  //   "ret"
-  // );
 }
 
 void spmp_rwx_test(uint64_t addr) {

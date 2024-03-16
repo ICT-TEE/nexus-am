@@ -7,10 +7,15 @@
 #include <klib-macros.h>
 
 #include <csr.h>
-#include <xsextra.h>
 
-#define TEST_BASE  0x80010000
-#define INDEX_MASK 0x0000f000
+#if defined(__ARCH_RISCV64_NOOP) || defined(__ARCH_RISCV64_XS)
+#define TEST_MAX    0x100000000
+#define TEST_BASE   0x80000000
+#elif defined(__ARCH_RISCV64_XS_NHV3) || defined(__ARCH_RISCV64_XS_NHV3_FLASH)
+#define TEST_MAX    0x10000000000
+#define TEST_BASE   0x1000010000
+#endif
+#define INDEX_MASK  0x0000f000
 
 void init_spmp();
 void enable_spmp(uintptr_t pmp_reg, uintptr_t pmp_addr, uintptr_t pmp_size, uint8_t s, uint8_t permission);
@@ -30,5 +35,13 @@ void spmp_test_init_modeS();
 void spmp_test_modeU();
 void spmp_test_modeS();
 void spmp_test_modeS_SUM();
+
+
+#define MRET(MSTATUS, MEPC) asm volatile(   \
+      "csrw mstatus, %0;" \
+      "csrw mepc, %1;"  \
+      " mret;"  \
+      : : "r"(MSTATUS), "r"(MEPC));
+
 
 #endif
